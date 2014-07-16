@@ -15,18 +15,25 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Doctrine listener used to manipulate mappings.
  *
  * @author Ivan Molchanov <ivan.molchanov@opensoftdev.ru>
  */
-class LoadORMMetadataSubscriber implements EventSubscriber
+class LoadORMMetadataSubscriber implements EventSubscriber, ContainerAwareInterface
 {
     /**
      * @var array
      */
     protected $classes;
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
 
     /**
      * Constructor
@@ -36,6 +43,14 @@ class LoadORMMetadataSubscriber implements EventSubscriber
     public function __construct($classes)
     {
         $this->classes = $classes;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
     }
 
     /**
@@ -55,6 +70,10 @@ class LoadORMMetadataSubscriber implements EventSubscriber
     {
         /** @var ClassMetadata $metadata */
         $metadata = $eventArgs->getClassMetadata();
+
+        $ignoredEntities = $this->container->getParameter('sylius_excluded_entities');
+        if(in_array($metadata->getName(), $ignoredEntities))
+            return;
 
         $this->setCustomRepositoryClasses($metadata);
 

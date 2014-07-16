@@ -48,6 +48,9 @@
         <service id="sylius.event_subscriber.load_orm_metadata" class="%sylius.event_subscriber.load_orm_metadata.class%">
             <argument>%sylius.config.classes%</argument>
             <tag name="doctrine.event_subscriber" />
+             <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
         </service>
         <service id="sylius.event_subscriber.load_odm_metadata" class="%sylius.event_subscriber.load_odm_metadata.class%">
             <argument>%sylius.config.classes%</argument>
